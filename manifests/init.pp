@@ -205,11 +205,10 @@ class foreman_proxy_content (
     notify   => Service['foreman-proxy'],
   }
 
-  class { 'certs::katello':
+  class { 'foreman_proxy_content::bootstrap_rpm':
     hostname       => $rhsm_hostname,
     deployment_url => $rhsm_url,
     rhsm_port      => $rhsm_port,
-    require        => Class['certs'],
   }
 
   if $pulp or $reverse_proxy_real {
