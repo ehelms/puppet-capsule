@@ -20,8 +20,6 @@
 #
 # === Advanced parameters:
 #
-# $puppet::                             Enable puppet
-#
 # $pulp_admin_password::                Password for the Pulp admin user. It should be left blank so that a random password is generated
 #
 # $pulp_max_speed::                     The maximum download speed per second for a Pulp task, such as a sync. (e.g. "4 Kb" (Uses SI KB), 4MB, or 1GB" )
@@ -127,8 +125,6 @@ class foreman_proxy_content (
   Optional[Integer[1]] $pulp_puppet_wsgi_processes = $foreman_proxy_content::params::pulp_puppet_wsgi_processes,
   Optional[Stdlib::Absolutepath] $pulp_ca_cert = $foreman_proxy_content::params::pulp_ca_cert,
   Integer[0] $pulp_worker_timeout = $foreman_proxy_content::params::pulp_worker_timeout,
-
-  Boolean $puppet = $foreman_proxy_content::params::puppet,
 
   Boolean $reverse_proxy = $foreman_proxy_content::params::reverse_proxy,
   Stdlib::Port $reverse_proxy_port = $foreman_proxy_content::params::reverse_proxy_port,
@@ -426,12 +422,10 @@ class foreman_proxy_content (
     include pulpcore::plugin::certguard
   }
 
-  if $puppet {
-    # We can't pull the certs out to the top level, because of how it gets the default
-    # parameter values from the main certs class.  Kafo can't handle that case, so
-    # it remains here for now.
+  if $puppet::server {
     include puppet
-    if $puppet::server and $puppet::server::foreman {
+
+    if $puppet::server::foreman {
       class { 'certs::puppet':
         hostname => $foreman_proxy_fqdn,
         before   => Class['foreman::puppetmaster'],
